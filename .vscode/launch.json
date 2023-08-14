@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "AWS DQN",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/aws/aws_helper.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "create-image",
+                "--installation-scripts",
+                "${workspaceFolder}/aws/install/install.sh"
+            ]
+        },
+        {
+            "name": "DQN",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/dqn_train.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "dqn_example/dqn_config.yaml",
+                "--name",
+                "dqn",
+                "--overwrite"
+            ],
+            "env":{"CARLA_ROOT":"/home/konstantinos/CARLA_0.9.11"}
+        }
+    ]
+}
