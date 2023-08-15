@@ -12,15 +12,15 @@ import argparse
 import yaml
 
 import ray
-from ray.rllib.agents.dqn import DQNTrainer
+from ray.rllib.agents.ppo import PPOTrainer
 
 from rllib_integration.carla_env import CarlaEnv
 from rllib_integration.carla_core import kill_all_servers
 
-from dqn_example.dqn_experiment import DQNExperiment
+from ppo_example.ppo_experiment import PPOExperiment
 
 # Set the experiment to EXPERIMENT_CLASS so that it is passed to the configuration
-EXPERIMENT_CLASS = DQNExperiment
+EXPERIMENT_CLASS = PPOExperiment
 
 def parse_config(args):
     """
@@ -54,7 +54,7 @@ def main():
         ray.init()
 
         # Restore agent
-        agent = DQNTrainer(env=CarlaEnv, config=args.config)
+        agent = PPOTrainer(env=CarlaEnv, config=args.config)
         agent.restore(args.checkpoint)
 
         # Initalize the CARLA environment

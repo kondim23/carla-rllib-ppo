@@ -3,30 +3,30 @@
 framework: "torch"
 num_workers: 1
 # num_gpus_per_worker: 1
-num_gpus: 1
+num_gpus: 0
 num_cpus_per_worker: 11
-rollout_fragment_length: 16
-timesteps_per_iteration: 20000
-train_batch_size: 64
-learning_starts: 100
-buffer_size: 500
+# rollout_fragment_length: 16
+# timesteps_per_iteration: 20000
+# train_batch_size: 64
+# learning_starts: 100
+# buffer_size: 500
 # num_steps_sampled_before_learning_starts: 20000
 # replay_buffer_config:
 #   capacity': 5000
 # "batch_mode": "complete_episodes"
-lr: 0.0025
+# lr: 0.0025
 # "exploration_config": {
 #   "type": "EpsilonGreedy",
 #   "initial_epsilon": 1.0,
 #   "final_epsilon": 0.02,
 #   "epsilon_timesteps": 2000000
 # }
-exploration_config: {
-  type: "SoftQ",
-  temperature: 1.0,
-}
+# exploration_config: {
+#   type: "SoftQ",
+#   temperature: 1.0,
+# }
 
-hiddens: [256, 512]
+# hiddens: [256, 512]
 model: {
   dim: 300,
   conv_filters: [

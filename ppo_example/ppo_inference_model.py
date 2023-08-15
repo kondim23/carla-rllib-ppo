@@ -81,7 +81,7 @@ class SlimFC(nn.Module):
         return self._model(x)
 
 
-class CustomDQNModel(nn.Module):
+class CustomPPOModel(nn.Module):
 
     def __init__(self, gpu_n=0):
 

@@ -78,7 +78,7 @@ worker_nodes:
 # dictionary from REMOTE_PATH: LOCAL_PATH, e.g.
 file_mounts: {
     "~/rllib_integration": "rllib_integration",
-    "~/dqn_example": "dqn_example",
+    "~/ppo_example": "ppo_example",
 }
 
 # Whether changes to directories in file_mounts or cluster_synced_files in the head node

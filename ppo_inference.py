@@ -18,11 +18,11 @@ import torch
 from rllib_integration.carla_env import CarlaEnv
 from rllib_integration.carla_core import kill_all_servers
 
-from dqn_example.dqn_experiment import DQNExperiment
-from dqn_example.dqn_inference_model import CustomDQNModel
+from ppo_example.ppo_experiment import PPOExperiment
+from ppo_example.ppo_inference_model import CustomPPOModel
 
 # Set the experiment to EXPERIMENT_CLASS so that it is passed to the configuration
-EXPERIMENT_CLASS = DQNExperiment
+EXPERIMENT_CLASS = PPOExperiment
 
 def get_gpu_or_cpu_number(device):
     """Returns the GPU number on which the tensors will be run. Returns -1 if the CPU is used"""
@@ -70,7 +70,7 @@ def main():
 
     try:
         # Initialize the model and load the state dictionary
-        model = CustomDQNModel(gpu_n=args.gpu_n)
+        model = CustomPPOModel(gpu_n=args.gpu_n)
         model.load_state_dict(torch.load(args.checkpoint))
         model.eval()
         if args.gpu_n >= 0:

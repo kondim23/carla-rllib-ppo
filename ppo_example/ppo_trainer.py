@@ -9,14 +9,14 @@
 import torch
 import os
 
-from ray.rllib.agents.dqn import DQNTrainer
-# from ray.rllib.algorithms.dqn.dqn import DQN
+from ray.rllib.agents.ppo import PPOTrainer
+# from ray.rllib.algorithms.ppo.ppo import PPO
 
 
 
-class CustomDQNTrainer(DQNTrainer):
+class CustomPPOTrainer(PPOTrainer):
     """
-    Modified version of DQNTrainer with the added functionality of saving the torch model for later inference
+    Modified version of PPOTrainer with the added functionality of saving the torch model for later inference
     """
     def save_checkpoint(self, checkpoint_dir):
         checkpoint_path = super().save_checkpoint(checkpoint_dir)

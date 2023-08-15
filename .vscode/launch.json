@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "AWS DQN",
+            "name": "AWS PPO",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/aws/aws_helper.py",
@@ -18,16 +18,16 @@
             ]
         },
         {
-            "name": "DQN",
+            "name": "PPO",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/dqn_train.py",
+            "program": "${workspaceFolder}/ppo_train.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [
-                "dqn_example/dqn_config.yaml",
+                "ppo_example/ppo_config.yaml",
                 "--name",
-                "dqn",
+                "ppo",
                 "--overwrite"
             ],
             "env":{"CARLA_ROOT":"/home/konstantinos/CARLA_0.9.11"}

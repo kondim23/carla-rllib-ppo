@@ -5,7 +5,7 @@
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
-"""DQN Algorithm. Tested with CARLA.
+"""PPO Algorithm. Tested with CARLA.
 You can visualize experiment results in ~/ray_results using TensorBoard.
 """
 from __future__ import print_function
@@ -22,18 +22,18 @@ from rllib_integration.carla_core import kill_all_servers
 
 from rllib_integration.helper import get_checkpoint, launch_tensorboard
 
-from dqn_example.dqn_experiment import DQNExperiment
-from dqn_example.dqn_callbacks import DQNCallbacks
-from dqn_example.dqn_trainer import CustomDQNTrainer
+from ppo_example.ppo_experiment import PPOExperiment
+from ppo_example.ppo_callbacks import PPOCallbacks
+from ppo_example.ppo_trainer import CustomPPOTrainer
 
 # Set the experiment to EXPERIMENT_CLASS so that it is passed to the configuration
-EXPERIMENT_CLASS = DQNExperiment
+EXPERIMENT_CLASS = PPOExperiment
 
 
 def run(args):
     try:
         ray.init(address= "auto" if args.auto else None)
-        tune.run(CustomDQNTrainer,
+        tune.run(CustomPPOTrainer,
                  name=args.name,
                  local_dir=args.directory,
                  stop={"perf/ram_util_percent": 85.0},
@@ -57,7 +57,7 @@ def parse_config(args):
         config = yaml.load(f, Loader=yaml.FullLoader)
         config["env"] = CarlaEnv
         config["env_config"]["experiment"]["type"] = EXPERIMENT_CLASS
-        config["callbacks"] = DQNCallbacks
+        config["callbacks"] = PPOCallbacks
 
     return config
 
@@ -72,8 +72,8 @@ def main():
                            help="Specified directory to save results (default: ~/ray_results/carla_rllib")
     argparser.add_argument("-n", "--name",
                            metavar="N",
-                           default="dqn_example",
-                           help="Name of the experiment (default: dqn_example)")
+                           default="ppo_example",
+                           help="Name of the experiment (default: ppo_example)")
     argparser.add_argument("--restore",
                            action="store_true",
                            default=False,
