@@ -1,0 +1,22 @@
+todo:
+    - Add new sensors
+    - Reward function impl
+    - Work with Multiple workers on cloud
+    - Testing inference script
+    - Working with tune to achieve best model
+    - Parameters tuning:
+        - dyamic weather
+        - multiple towns
+        - multiple cars
+        - etc
+
+fixed:
+    - Tensor.cpu() to memory:
+        - added on ~/.local/lib/python3.8/site-packages/ray/rllib/evaluation/postprocessing.py line:60
+            if type(last_r)!=float:
+                last_r = last_r.cpu()
+    - Memory ray problem:
+        - changed ~/.local/lib/python3.8/site-packages/ray/util/iter.py line:742 from 
+                yield ray.get(futures, timeout=timeout)
+            to
+                yield [copy.deepcopy(ray.get(future)) for future in futures]
