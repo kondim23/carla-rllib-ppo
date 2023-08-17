@@ -49,7 +49,7 @@ class PPOExperiment(BaseExperiment):
         self.last_heading_deviation = 0
 
     def get_action_space(self):
-        """Returns the action space, in this case, a discrete space"""
+        """Returns the action space, in this case, a continuous space"""
         return Box(
                 low=np.array([0.0,-1.0,0.0]), 
                 high=np.array([1.0,1.0,1.0]), 
@@ -58,13 +58,14 @@ class PPOExperiment(BaseExperiment):
 
     def get_observation_space(self):
         num_of_channels = 3
+        count_of_cameras = 3
         image_space = Box(
             low=0.0,
             high=255.0,
             shape=(
-                self.config["hero"]["sensors"]["birdview"]["size"],
-                self.config["hero"]["sensors"]["birdview"]["size"],
-                num_of_channels * self.frame_stack,
+                self.config["hero"]["sensors"]["cam_sem_seg_front"]["image_size_x"],
+                self.config["hero"]["sensors"]["cam_sem_seg_front"]["image_size_y"],
+                num_of_channels * count_of_cameras * self.frame_stack,
             ),
             dtype=np.uint8,
         )
@@ -100,7 +101,12 @@ class PPOExperiment(BaseExperiment):
         as well as a variable with additional information about such observation.
         The information variable can be empty
         """
-        image = post_process_image(sensor_data['birdview'][1], normalized = False, grayscale = False)
+
+        for camera in ("cam_sem_seg_front","cam_sem_seg_left","cam_sem_seg_right"):
+            if camera=="cam_sem_seg_front":
+                image=sensor_data[camera][1]
+            else:
+                image = np.concatenate([sensor_data[camera][1], image], axis=2)
 
         if self.prev_image_0 is None:
             self.prev_image_0 = image

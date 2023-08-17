@@ -1,5 +1,5 @@
 todo:
-    - Add new sensors
+    - Bird view vs semantic segmentation cameras performance optimization
     - Reward function impl
     - Work with Multiple workers on cloud
     - Testing inference script
@@ -11,6 +11,10 @@ todo:
         - etc
 
 fixed:
+    - Add new sensors
+        - Added 3 semantic segmentation cameras (left-front-right)
+    - Ppo tuning (sgd, gae, etc)
+        - Changed configurations in ppo_config.py
     - Tensor.cpu() to memory:
         - added on ~/.local/lib/python3.8/site-packages/ray/rllib/evaluation/postprocessing.py line:60
             if type(last_r)!=float:

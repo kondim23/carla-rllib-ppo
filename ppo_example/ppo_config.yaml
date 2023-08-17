@@ -1,34 +1,24 @@
 # To see the complete list of configurable parameters see:
 # https://github.com/ray-project/ray/blob/master/rllib/agents/trainer.py
-framework: "torch"
-num_workers: 1
-# num_gpus_per_worker: 1
-num_gpus: 0
-num_cpus_per_worker: 11
-# rollout_fragment_length: 16
-# timesteps_per_iteration: 20000
-# train_batch_size: 64
-# learning_starts: 100
-# buffer_size: 500
-# num_steps_sampled_before_learning_starts: 20000
-# replay_buffer_config:
-#   capacity': 5000
-# "batch_mode": "complete_episodes"
-# lr: 0.0025
-# "exploration_config": {
-#   "type": "EpsilonGreedy",
-#   "initial_epsilon": 1.0,
-#   "final_epsilon": 0.02,
-#   "epsilon_timesteps": 2000000
-# }
-# exploration_config: {
-#   type: "SoftQ",
-#   temperature: 1.0,
-# }
 
-# hiddens: [256, 512]
+
+# === Settings for Rollout Worker processes ===
+num_workers: 1
+# rollout_fragment_length: 16
+# num_envs_per_worker: 
+# batch_mode: "truncate_episodes"
+
+
+# === Settings for the Trainer process ===
+num_gpus: 0.6
+train_batch_size: 128
+# optimizer: "Adam"
 model: {
+
+  # == Atari ==
   dim: 300,
+
+  # === Built-in options ===
   conv_filters: [
     [16, [5, 5], 4],
     [32, [5, 5], 2],
@@ -38,8 +28,92 @@ model: {
     [128, [5, 5], 2],
     [512, [5, 5], 1],
   ]
+
+  # == LSTM ==
+  # "use_lstm": False,
+  # "max_seq_len": 20,
+  # "lstm_cell_size": 256,
+  # "lstm_use_prev_action": False,
+  # "lstm_use_prev_reward": False,
 }
 
+
+# === PPO ===
+# use_critic: True
+# use_gae: True
+# lambda: 1.0
+# kl_coeff: 0.2
+# sgd_minibatch_size: 128
+# shuffle_sequences: True
+# num_sgd_iter: 30
+# lr_schedule: None
+# entropy_coeff: 0.0
+# entropy_coeff_schedule: None
+# clip_param: 0.3
+# vf_clip_param: 10.0
+# grad_clip: None
+# kl_target: 0.01
+
+
+# === Debug Settings ===
+# monitor: False
+# log_level: "WARN"
+# log_sys_usage: True
+
+
+# === Deep Learning Framework Settings ===
+framework: "torch"
+
+
+# === Exploration Settings ===
+# exploration_config: {
+#     "type": "EpsilonGreedy",
+#     "initial_epsilon": 1.0,
+#     "final_epsilon": 0.02,
+#     "epsilon_timesteps": 2000000
+#   }
+# exploration_config: {
+#   type: "SoftQ",
+#   temperature: 1.0,
+# }
+
+
+# === Evaluation Settings ===
+# evaluation_interval: None
+# evaluation_num_episodes: 10
+# in_evaluation: False
+# evaluation_config: {}
+# evaluation_num_workers: 0
+# custom_eval_function: None
+
+
+# === Advanced Rollout Settings ===
+# remote_worker_envs: False
+# seed: None
+# extra_python_environs_for_driver: {}
+# extra_python_environs_for_worker: {}
+# timesteps_per_iteration: 20000
+
+
+# === Advanced Resource Settings ===
+num_cpus_per_worker: 11
+# num_gpus_per_worker: 1
+# num_cpus_for_driver: 1
+# memory: 0
+# object_store_memory: 0
+# memory_per_worker: 0
+# object_store_memory_per_worker: 0
+
+
+# === Environment Settings ===
+# gamma: 0.99
+# horizon: None
+# soft_horizon: False
+# no_done_at_end: False
+# normalize_actions: False
+# clip_rewards: None
+# clip_actions: True
+# lr: 0.0025
 env_config:
   carla:
     host: "localhost"
@@ -57,12 +131,26 @@ env_config:
     hero:
       blueprint: "vehicle.audi.a2"
       sensors:
-        birdview:
-          type: "sensor.birdview"
-          size: 300
-          radius: 15
+        cam_sem_seg_front:
+          type: "sensor.camera.semantic_segmentation"
+          transform: "0,0,2,0,0,0"
+          image_size_x: 300
+          image_size_y: 300
+        cam_sem_seg_left:
+          type: "sensor.camera.semantic_segmentation"
+          transform: "0,0,2,0,-90.0,0"
+          image_size_x: 300
+          image_size_y: 300
+        cam_sem_seg_right:
+          type: "sensor.camera.semantic_segmentation"
+          transform: "0,0,2,0,90.0,0"
+          image_size_x: 300
+          image_size_y: 300
+        # lidar:
+        #   type: "sensor.lidar.ray_cast "
+        #   transform: "0,0,2,0,0,0"
       spawn_points: [
-        "-130.80254883,103.26209961,1",  # x,y,z[,roll,pitch,yaw]
+        "-130.80254883,103.26209961,1",
         "-258.58019531,0.32128639,1",
         "-130.50441406,136.6653125,1",
         "-258.58871094,-3.82127594,1",
