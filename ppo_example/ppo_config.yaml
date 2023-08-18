@@ -6,11 +6,11 @@
 num_workers: 1
 # rollout_fragment_length: 16
 # num_envs_per_worker: 
-# batch_mode: "truncate_episodes"
+batch_mode: "complete_episodes"
 
 
 # === Settings for the Trainer process ===
-num_gpus: 0.6
+num_gpus: 1
 train_batch_size: 128
 # optimizer: "Adam"
 model: {
@@ -146,6 +146,8 @@ env_config:
           transform: "0,0,2,0,90.0,0"
           image_size_x: 300
           image_size_y: 300
+        collision:
+          type: "sensor.other.collision"
         # lidar:
         #   type: "sensor.lidar.ray_cast "
         #   transform: "0,0,2,0,0,0"

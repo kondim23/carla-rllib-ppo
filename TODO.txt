@@ -1,6 +1,8 @@
 todo:
-    - Bird view vs semantic segmentation cameras performance optimization
-    - Reward function impl
+    - Reward function impl:
+        - Find nearest traffic light
+        - Ignore vehicles and traffic lights behind
+        - Enable collision sensors
     - Work with Multiple workers on cloud
     - Testing inference script
     - Working with tune to achieve best model
@@ -11,6 +13,16 @@ todo:
         - etc
 
 fixed:
+    - Reward function impl:
+        - Reward if going forward
+        - Reward if going faster than last step
+        - Penalize if not inside the lane
+        - Penalize going backwards
+        - Penalize not restoring driver heading
+        - Penalize deviating lane heading
+        - Penalize distance from center of the lane
+        - Penalize optimal velocity deviation 
+    - Bird view vs semantic segmentation cameras performance optimization
     - Add new sensors
         - Added 3 semantic segmentation cameras (left-front-right)
     - Ppo tuning (sgd, gae, etc)

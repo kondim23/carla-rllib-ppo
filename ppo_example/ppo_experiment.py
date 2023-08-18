@@ -33,6 +33,7 @@ class PPOExperiment(BaseExperiment):
         # Ending variables
         self.time_idle = 0
         self.time_episode = 0
+        self.collision = False
         self.done_time_idle = False
         self.done_falling = False
         self.done_time_episode = False
@@ -58,7 +59,7 @@ class PPOExperiment(BaseExperiment):
 
     def get_observation_space(self):
         num_of_channels = 3
-        count_of_cameras = 3
+        count_of_cameras = 1
         image_space = Box(
             low=0.0,
             high=255.0,
@@ -102,11 +103,13 @@ class PPOExperiment(BaseExperiment):
         The information variable can be empty
         """
 
+        print(sensor_data)
+
         for camera in ("cam_sem_seg_front","cam_sem_seg_left","cam_sem_seg_right"):
             if camera=="cam_sem_seg_front":
                 image=sensor_data[camera][1]
-            else:
-                image = np.concatenate([sensor_data[camera][1], image], axis=2)
+            # else:
+                # image = np.concatenate([sensor_data[camera][1], image], axis=2)
 
         if self.prev_image_0 is None:
             self.prev_image_0 = image
@@ -158,6 +161,16 @@ class PPOExperiment(BaseExperiment):
             if waypoint is not None:
                 return waypoint.lane_type in allowed_types
             return False
+        def compute_distance(v,u):
+            return float(np.sqrt(np.square(v.x - u.x) + np.square(v.y - u.y)))
+        def compute_optimal_speed(distance):
+            return alpha*distance+beta
+                    
+        
+        max_speed = 20
+        reaction_distance = 6
+        alpha = max_speed/(reaction_distance-1)
+        beta = -alpha
 
         world = core.world
         hero = core.hero
@@ -174,8 +187,7 @@ class PPOExperiment(BaseExperiment):
             self.last_location = hero_location
 
         # Compute deltas
-        delta_distance = float(np.sqrt(np.square(hero_location.x - self.last_location.x) + \
-                            np.square(hero_location.y - self.last_location.y)))
+        delta_distance = compute_distance(hero_location, self.last_location)
         delta_velocity = hero_velocity - self.last_velocity
 
         # Update variables
@@ -206,6 +218,21 @@ class PPOExperiment(BaseExperiment):
                 angle = compute_angle(hero_heading, wp_heading)
                 self.last_heading_deviation = abs(angle)
 
+
+                #Penalize deviating lane heading [0,1]
+                reward += -self.last_heading_deviation/math.pi
+
+
+                #Penalize distance from center of the lane
+                closest_waypoint_in_lane = map_.get_waypoint(hero_location, lane_type=carla.LaneType.Driving | carla.LaneType.Parking)
+                lane_center_deviation = compute_distance(
+                        closest_waypoint.transform.location,
+                        closest_waypoint_in_lane.transform.location,
+                    )
+                
+                reward += -lane_center_deviation/closest_waypoint_in_lane.lane_width
+
+
                 if np.dot(hero_heading, wp_heading) < 0:
                     # We are going in the wrong direction
                     reward += -0.5
@@ -219,6 +246,39 @@ class PPOExperiment(BaseExperiment):
                             reward -= 0.05
             else:
                 self.last_heading_deviation = 0
+
+            next_tl = world.get_traffic_lights_from_waypoint(closest_waypoint, reaction_distance)
+
+            for tl in range(len(next_tl)):
+                if next_tl[tl].state!="Green":
+                    next_tl[tl] = compute_optimal_speed(
+                        compute_distance(
+                            next_tl[tl].get_stop_waypoints()[0].transform.location,
+                            closest_waypoint.transform.location)
+                        )
+                else:
+                    next_tl[tl] = max_speed
+
+            next_veh = world.get_actors().filter("vehicle.*")
+
+            for veh in range(len(next_veh)):
+                next_veh[veh] = compute_optimal_speed(
+                    compute_distance(
+                        next_veh[veh].get_location(),
+                        hero_location
+                    )
+                )
+
+            next_tl.extend(next_veh)
+
+            if len(next_tl)!=0:
+                optimal_speed = min(next_tl)
+            else:
+                optimal_speed = max_speed
+
+            #Penalize optimal velocity deviation 
+            reward += -abs(hero_velocity-optimal_speed)/max_speed+1
+
 
         if self.done_falling:
             reward += -40
