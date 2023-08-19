@@ -1,18 +1,15 @@
 todo:
-    - Reward function impl:
-        - Find nearest traffic light
-        - Ignore vehicles and traffic lights behind
-        - Enable collision sensors
+    - Aws ray wont autoscale
+    - Working with tune to achieve best model
+
+fixed:
     - Work with Multiple workers on cloud
     - Testing inference script
-    - Working with tune to achieve best model
     - Parameters tuning:
         - dyamic weather
         - multiple towns
         - multiple cars
         - etc
-
-fixed:
     - Reward function impl:
         - Reward if going forward
         - Reward if going faster than last step

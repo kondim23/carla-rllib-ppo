@@ -19,6 +19,7 @@ import carla
 from rllib_integration.sensors.sensor_interface import SensorInterface
 from rllib_integration.sensors.factory import SensorFactory
 from rllib_integration.helper import join_dicts
+from rllib_integration.dynamic_weather import Weather
 
 BASE_CORE_CONFIG = {
     "host": "localhost",  # Client host
@@ -56,6 +57,10 @@ class CarlaCore:
         self.world = None
         self.map = None
         self.hero = None
+        self.dynamic_weather = False
+        self.elapsed_time = 0.0
+        self.speed_factor = 1.0
+        self.update_freq = 0.1 / self.speed_factor
         self.config = join_dicts(BASE_CORE_CONFIG, config)
         self.sensor_interface = SensorInterface()
 
@@ -136,15 +141,20 @@ class CarlaCore:
         """Initialize the hero and sensors"""
 
         self.world = self.client.load_world(
-            map_name = experiment_config["town"],
+            map_name = random.choice(experiment_config["town"]),
             reset_settings = False,
             map_layers = carla.MapLayer.All if self.config["enable_map_assets"] else carla.MapLayer.NONE)
 
         self.map = self.world.get_map()
 
         # Choose the weather of the simulation
-        weather = getattr(carla.WeatherParameters, experiment_config["weather"])
-        self.world.set_weather(weather)
+
+        if experiment_config["weather"]=="dynamic":
+            self.dynamic_weather = True
+            self.weather = Weather(self.world.get_weather())
+        else:
+            weather = getattr(carla.WeatherParameters, experiment_config["weather"])
+            self.world.set_weather(weather)
 
         self.tm_port = self.server_port // 10 + self.server_port % 10
         while is_used(self.tm_port):
@@ -326,6 +336,13 @@ class CarlaCore:
         # Move the spectator
         if self.config["enable_rendering"]:
             self.set_spectator_camera_view()
+
+        if self.dynamic_weather:
+            self.elapsed_time += self.world.get_snapshot().timestamp.delta_seconds
+            if self.elapsed_time > self.update_freq:
+                self.weather.tick(self.speed_factor * self.elapsed_time)
+                self.world.set_weather(self.weather.weather)
+                self.elapsed_time = 0.0
 
         # Return the new sensor data
         return self.get_sensor_data()

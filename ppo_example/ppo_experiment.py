@@ -81,11 +81,10 @@ class PPOExperiment(BaseExperiment):
     def compute_action(self, action):
         """Given the action, returns a carla.VehicleControl() which will be applied to the hero"""
 
-        # print(action)
         control = carla.VehicleControl()
-        control.throttle = action[0]
+        control.throttle = action[0] if action[0]>action[2] else 0
         control.steer = action[1]
-        control.brake = action[2]
+        control.brake = action[2] if action[0]<=action[2] else 0
         control.reverse = False
         control.handbrake = False
 
