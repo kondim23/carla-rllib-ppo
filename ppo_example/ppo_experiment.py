@@ -59,7 +59,7 @@ class PPOExperiment(BaseExperiment):
 
     def get_observation_space(self):
         num_of_channels = 3
-        count_of_cameras = 1
+        count_of_cameras = 3
         image_space = Box(
             low=0.0,
             high=255.0,
@@ -103,13 +103,12 @@ class PPOExperiment(BaseExperiment):
         The information variable can be empty
         """
 
-        print(sensor_data)
 
         for camera in ("cam_sem_seg_front","cam_sem_seg_left","cam_sem_seg_right"):
             if camera=="cam_sem_seg_front":
                 image=sensor_data[camera][1]
-            # else:
-                # image = np.concatenate([sensor_data[camera][1], image], axis=2)
+            else:
+                image = np.concatenate([sensor_data[camera][1], image], axis=2)
 
         if self.prev_image_0 is None:
             self.prev_image_0 = image
@@ -129,6 +128,8 @@ class PPOExperiment(BaseExperiment):
         self.prev_image_1 = self.prev_image_0
         self.prev_image_0 = image
 
+        self.collision = "collision" in sensor_data.keys()
+
         return images, {}
 
     def get_speed(self, hero):
@@ -147,10 +148,16 @@ class PPOExperiment(BaseExperiment):
         self.time_episode += 1
         self.done_time_episode = self.max_time_episode < self.time_episode
         self.done_falling = hero.get_location().z < -0.5
-        return self.done_time_idle or self.done_falling or self.done_time_episode
+        return self.done_time_idle or self.done_falling or self.done_time_episode or self.collision
 
     def compute_reward(self, observation, core):
         """Computes the reward"""
+
+        max_speed = 20
+        max_reactive_distance = 6
+        alpha = max_speed/(max_reactive_distance-1)
+        beta = -alpha
+
         def unit_vector(vector):
             return vector / np.linalg.norm(vector)
         def compute_angle(u, v):
@@ -164,14 +171,19 @@ class PPOExperiment(BaseExperiment):
         def compute_distance(v,u):
             return float(np.sqrt(np.square(v.x - u.x) + np.square(v.y - u.y)))
         def compute_optimal_speed(distance):
-            return alpha*distance+beta
+            if (distance>max_reactive_distance):
+                return max_speed
+            elif (distance<1):
+                return 0
+            else:
+                return alpha*distance+beta
+        def get_target_distance():
+            return carla.Location(
+                    x=hero_location.x+hero_heading[0]*max_reactive_distance,
+                    y=hero_location.y+hero_heading[1]*max_reactive_distance,
+                    z=hero_location.z
+                )
                     
-        
-        max_speed = 20
-        reaction_distance = 6
-        alpha = max_speed/(reaction_distance-1)
-        beta = -alpha
-
         world = core.world
         hero = core.hero
         map_ = core.map
@@ -198,7 +210,7 @@ class PPOExperiment(BaseExperiment):
         reward = delta_distance
 
         # Reward if going faster than last step
-        if hero_velocity < 20.0:
+        if hero_velocity < max_speed:
             reward += 0.05 * delta_velocity
 
         # La duracion de estas infracciones deberia ser 2 segundos?
@@ -247,34 +259,22 @@ class PPOExperiment(BaseExperiment):
             else:
                 self.last_heading_deviation = 0
 
-            next_tl = world.get_traffic_lights_from_waypoint(closest_waypoint, reaction_distance)
 
-            for tl in range(len(next_tl)):
-                if next_tl[tl].state!="Green":
-                    next_tl[tl] = compute_optimal_speed(
-                        compute_distance(
-                            next_tl[tl].get_stop_waypoints()[0].transform.location,
-                            closest_waypoint.transform.location)
-                        )
-                else:
-                    next_tl[tl] = max_speed
+            reaction_distance = np.Infinity
 
-            next_veh = world.get_actors().filter("vehicle.*")
+            #Nearest traffic Light Distance
+            front_traffic_lights = hero.get_traffic_light()
+            if front_traffic_lights!=None:
+                reaction_distance = compute_distance(front_traffic_lights.get_location(), hero_location)
 
-            for veh in range(len(next_veh)):
-                next_veh[veh] = compute_optimal_speed(
-                    compute_distance(
-                        next_veh[veh].get_location(),
-                        hero_location
-                    )
-                )
-
-            next_tl.extend(next_veh)
-
-            if len(next_tl)!=0:
-                optimal_speed = min(next_tl)
-            else:
-                optimal_speed = max_speed
+            #Nearest vehicle in fov
+            for veh in world.get_actors().filter("vehicle.*"):
+                distance_a = compute_distance(veh.get_location(),hero_location)
+                distance_b = compute_distance(veh.get_location(),get_target_distance())
+                if distance_a<max_reactive_distance and distance_b<max_reactive_distance:
+                    reaction_distance = min((reaction_distance,distance_a))
+            
+            optimal_speed = compute_optimal_speed(reaction_distance)
 
             #Penalize optimal velocity deviation 
             reward += -abs(hero_velocity-optimal_speed)/max_speed+1
@@ -288,5 +288,8 @@ class PPOExperiment(BaseExperiment):
         if self.done_time_episode:
             print("Done max time")
             reward += 100
+        if self.collision:
+            print("Collision")
+            reward += -100
 
         return reward
