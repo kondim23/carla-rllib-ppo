@@ -3,16 +3,16 @@
 
 
 # === Settings for Rollout Worker processes ===
-num_workers: 5
+num_workers: 1
 rollout_fragment_length: 16
 num_envs_per_worker: 1
 batch_mode: "complete_episodes"
 
 
 # === Settings for the Trainer process ===
-num_gpus: 1
+num_gpus: 0.6
 train_batch_size: 64
-# optimizer: "Adam"
+optimizer: "Adam"
 model: {
 
   # == Atari ==
@@ -43,7 +43,7 @@ model: {
 # use_gae: True
 # lambda: 1.0
 # kl_coeff: 0.2
-sgd_minibatch_size: 64
+sgd_minibatch_size: 32
 # shuffle_sequences: True
 # num_sgd_iter: 30
 # lr_schedule: None
@@ -66,12 +66,9 @@ framework: "torch"
 
 
 # === Exploration Settings ===
-# exploration_config: {
-#     "type": "EpsilonGreedy",
-#     "initial_epsilon": 1.0,
-#     "final_epsilon": 0.02,
-#     "epsilon_timesteps": 2000000
-#   }
+exploration_config: {
+    "type": "StochasticSampling"
+  }
 # exploration_config: {
 #   type: "SoftQ",
 #   temperature: 1.0,
@@ -96,13 +93,13 @@ framework: "torch"
 
 
 # === Advanced Resource Settings ===
-num_cpus_per_worker: 2
-# num_gpus_per_worker: 1
-# num_cpus_for_driver: 1
-# memory: 0
-# object_store_memory: 0
-# memory_per_worker: 0
-# object_store_memory_per_worker: 0
+num_cpus_per_worker: 4
+num_gpus_per_worker: 0.4
+num_cpus_for_driver: 4
+# memory: 1000000000
+# object_store_memory: 1000000000
+# memory_per_worker: 1000000000
+# object_store_memory_per_worker: 1000000000
 
 
 # === Environment Settings ===
@@ -156,14 +153,14 @@ env_config:
       n_walkers: 0
       tm_hybrid_mode: True
     town: [
-      "Town07_Opt",
-      "Town01_Opt",
-      "Town03_Opt",
-      "Town02_Opt",
+      # "Town07_Opt",
+      # "Town01_Opt",
+      # "Town03_Opt",
+      # "Town02_Opt",
       "Town05_Opt"
       ]
     weather: "dynamic"
     others:
       framestack: 4
-      max_time_idle: 100
+      max_time_idle: 600
       max_time_episode: 6400

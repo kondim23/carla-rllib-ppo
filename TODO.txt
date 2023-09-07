@@ -1,8 +1,10 @@
 todo:
-    - Aws ray wont autoscale
-    - Working with tune to achieve best model
 
 fixed:
+    - Aws ray wont autoscale
+    - Working with tune to achieve best model
+    - Set clip parameters, lr, optimizer, 
+    - Expose tensorboard and ray dashboard
     - Work with Multiple workers on cloud
     - Testing inference script
     - Parameters tuning:
@@ -33,3 +35,58 @@ fixed:
                 yield ray.get(futures, timeout=timeout)
             to
                 yield [copy.deepcopy(ray.get(future)) for future in futures]
+
+noted:
+    - exposed tensorboard & ray dashboard:
+        locally:
+            tensoboard:
+                ssh -L 16006:127.0.0.1:6008 -o IdentitiesOnly=yes -i /home/konstantinos/.ssh/ray-autoscaler_eu-west-3.pem ubuntu@35.181.152.10
+            ray dashboard:
+                ssh -L 16007:127.0.0.1:8265 -o IdentitiesOnly=yes -i /home/konstantinos/.ssh/ray-autoscaler_eu-west-3.pem ubuntu@35.181.152.10
+
+        remotely:
+            tensorboard --logdir /home/ubuntu/ray_results/carla_rllib/ppo_example --port 6008
+
+        browse:
+            http://127.0.0.1:16007/
+            http://127.0.0.1:16006/
+
+
+Environment:
+
+    reward function:
+        - Reward if going forward
+        - Reward if going faster than last step
+        - Reward if reached episode max time
+        - Penalize deviating lane heading
+        - Penalize going backwards
+        - Penalize optimal velocity deviation (depends on):
+            - max velocity allowed
+            - distance to red traffic light
+            - distance to proceding vehicle
+        - Penalize distance from center of the lane
+        - Penalize if not inside the lane
+        - Penalize not restoring driver heading
+        - Penalize collision
+        - Penalize idle time
+
+    count_of_cameras = 3
+    
+    
+    autoscaler workers: 2 (head and 1 worker)
+    num_workers: 5
+    num_envs_per_worker: 2
+    num_gpus: 1
+    num_cpus_per_worker: 3
+    num_gpus_per_worker: 0.14
+    rollout_fragment_length: 16
+    train_batch_size: 64
+    sgd_minibatch_size: 64
+    batch_mode: "complete_episodes"
+    n_vehicles: 50
+    town: [
+        "Town02_Opt",
+        "Town05_Opt"
+        ]
+    weather: "dynamic"
+
