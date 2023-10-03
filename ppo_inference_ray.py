@@ -6,6 +6,11 @@
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
 
+# This project was sourced by https://github.com/carla-simulator/rllib-integration/tree/main 
+# and was modified within the development of the bachelor thesis "End-To-End On-Policy 
+# Reinforcement Learning on a Self-Driving Car in Urban Settings" by Konstantinos Dimitrakopoulos,
+# student of the department of Informatics and Telecommunications, University of Athens
+
 from __future__ import print_function
 
 import argparse
@@ -17,7 +22,7 @@ from ray.rllib.agents.ppo import PPOTrainer
 from rllib_integration.carla_env import CarlaEnv
 from rllib_integration.carla_core import kill_all_servers
 
-from ppo_example.ppo_experiment import PPOExperiment
+from ppo_implementation.ppo_experiment import PPOExperiment
 
 # Set the experiment to EXPERIMENT_CLASS so that it is passed to the configuration
 EXPERIMENT_CLASS = PPOExperiment

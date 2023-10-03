@@ -6,6 +6,11 @@
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
 
+# This project was sourced by https://github.com/carla-simulator/rllib-integration/tree/main 
+# and was modified within the development of the bachelor thesis "End-To-End On-Policy 
+# Reinforcement Learning on a Self-Driving Car in Urban Settings" by Konstantinos Dimitrakopoulos,
+# student of the department of Informatics and Telecommunications, University of Athens
+
 import os
 import random
 import signal
@@ -377,9 +382,4 @@ class CarlaCore:
     def get_sensor_data(self):
         """Returns the data sent by the different sensors at this tick"""
         sensor_data = self.sensor_interface.get_data()
-        # print("---------")
-        # world_frame = self.world.get_snapshot().frame
-        # print("World frame: {}".format(world_frame))
-        # for name, data in sensor_data.items():
-        #     print("{}: {}".format(name, data[0]))
         return sensor_data

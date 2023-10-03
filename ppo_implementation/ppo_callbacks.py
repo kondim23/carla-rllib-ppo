@@ -6,10 +6,14 @@
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
 
+# This project was sourced by https://github.com/carla-simulator/rllib-integration/tree/main 
+# and was modified within the development of the bachelor thesis "End-To-End On-Policy 
+# Reinforcement Learning on a Self-Driving Car in Urban Settings" by Konstantinos Dimitrakopoulos,
+# student of the department of Informatics and Telecommunications, University of Athens
+
 import numpy as np
 
 from ray.rllib.agents.callbacks import DefaultCallbacks
-# from ray.rllib.algorithms.callbacks import DefaultCallbacks
 
 
 class PPOCallbacks(DefaultCallbacks):

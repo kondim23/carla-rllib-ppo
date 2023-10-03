@@ -6,6 +6,11 @@
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
 
+# This project was sourced by https://github.com/carla-simulator/rllib-integration/tree/main 
+# and was modified within the development of the bachelor thesis "End-To-End On-Policy 
+# Reinforcement Learning on a Self-Driving Car in Urban Settings" by Konstantinos Dimitrakopoulos,
+# student of the department of Informatics and Telecommunications, University of Athens
+
 import math
 import numpy as np
 from gym.spaces import Box
@@ -55,7 +60,7 @@ class PPOExperiment(BaseExperiment):
                 low=np.array([0.0,-1.0,0.0]), 
                 high=np.array([1.0,1.0,1.0]), 
                 dtype=float
-            )
+            ) #action space defining velocity [0.0,1.0], steering [-1.0,1.0] and braking [0.0,1.0]
 
     def get_observation_space(self):
         num_of_channels = 3
@@ -69,7 +74,7 @@ class PPOExperiment(BaseExperiment):
                 num_of_channels * count_of_cameras * self.frame_stack,
             ),
             dtype=np.uint8,
-        )
+        ) #observations of shape [image_size_x, image_size_y, num_of_channels * count_of_cameras * frame_stack]
         return image_space
 
     def get_actions(self):
@@ -82,9 +87,9 @@ class PPOExperiment(BaseExperiment):
         """Given the action, returns a carla.VehicleControl() which will be applied to the hero"""
 
         control = carla.VehicleControl()
-        control.throttle = action[0] if action[0]>action[2] else 0
+        control.throttle = action[0] if action[0]>action[2] else 0 #restrict concurrent throttle and brake
         control.steer = action[1]
-        control.brake = action[2] if action[0]<=action[2] else 0
+        control.brake = action[2] if action[0]<=action[2] else 0 #restrict concurrent throttle and brake
         control.reverse = False
         control.handbrake = False
 
@@ -102,7 +107,7 @@ class PPOExperiment(BaseExperiment):
         The information variable can be empty
         """
 
-
+        #concatenate live camera frames
         for camera in ("cam_sem_seg_front","cam_sem_seg_left","cam_sem_seg_right"):
             if camera=="cam_sem_seg_front":
                 image=sensor_data[camera][1]
@@ -116,6 +121,7 @@ class PPOExperiment(BaseExperiment):
 
         images = image
 
+        #concatenate live and previous frames
         if self.frame_stack >= 2:
             images = np.concatenate([self.prev_image_0, images], axis=2)
         if self.frame_stack >= 3 and images is not None:
@@ -127,6 +133,7 @@ class PPOExperiment(BaseExperiment):
         self.prev_image_1 = self.prev_image_0
         self.prev_image_0 = image
 
+        #identify collision if any
         self.collision = "collision" in sensor_data.keys()
 
         return images, {}
@@ -147,6 +154,8 @@ class PPOExperiment(BaseExperiment):
         self.time_episode += 1
         self.done_time_episode = self.max_time_episode < self.time_episode
         self.done_falling = hero.get_location().z < -0.5
+
+        #done if car is idle, collided, fell through graphics or reached max episode time
         return self.done_time_idle or self.done_falling or self.done_time_episode or self.collision
 
     def compute_reward(self, observation, core):
@@ -159,16 +168,22 @@ class PPOExperiment(BaseExperiment):
 
         def unit_vector(vector):
             return vector / np.linalg.norm(vector)
+        
         def compute_angle(u, v):
             return -math.atan2(u[0]*v[1] - u[1]*v[0], u[0]*v[0] + u[1]*v[1])
+        
         def find_current_waypoint(map_, hero):
             return map_.get_waypoint(hero.get_location(), project_to_road=False, lane_type=carla.LaneType.Any)
+        
         def inside_lane(waypoint, allowed_types):
             if waypoint is not None:
                 return waypoint.lane_type in allowed_types
             return False
+        
         def compute_distance(v,u):
             return float(np.sqrt(np.square(v.x - u.x) + np.square(v.y - u.y)))
+        
+
         def compute_optimal_speed(distance):
             if (distance>max_reactive_distance):
                 return max_speed
@@ -176,6 +191,7 @@ class PPOExperiment(BaseExperiment):
                 return 0
             else:
                 return alpha*distance+beta
+            
         def get_target_distance():
             return carla.Location(
                     x=hero_location.x+hero_heading[0]*max_reactive_distance,
@@ -212,16 +228,17 @@ class PPOExperiment(BaseExperiment):
         if hero_velocity < max_speed:
             reward += 0.05 * delta_velocity
 
-        # La duracion de estas infracciones deberia ser 2 segundos?
         # Penalize if not inside the lane
         closest_waypoint = map_.get_waypoint(
             hero_location,
             project_to_road=False,
             lane_type=carla.LaneType.Any
         )
+
         if closest_waypoint is None or closest_waypoint.lane_type not in self.allowed_types:
             reward += -0.5
             self.last_heading_deviation = math.pi
+            
         else:
             if not closest_waypoint.is_junction:
                 wp_heading = closest_waypoint.transform.get_forward_vector()
@@ -245,7 +262,7 @@ class PPOExperiment(BaseExperiment):
 
 
                 if np.dot(hero_heading, wp_heading) < 0:
-                    # We are going in the wrong direction
+                    # Car is in the wrong direction
                     reward += -0.5
 
                 else:

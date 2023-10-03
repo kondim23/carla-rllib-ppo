@@ -1,24 +1,22 @@
-# To see the complete list of configurable parameters see:
-# https://github.com/ray-project/ray/blob/master/rllib/agents/trainer.py
+# This project was sourced by https://github.com/carla-simulator/rllib-integration/tree/main 
+# and was modified within the development of the bachelor thesis "End-To-End On-Policy 
+# Reinforcement Learning on a Self-Driving Car in Urban Settings" by Konstantinos Dimitrakopoulos,
+# student of the department of Informatics and Telecommunications, University of Athens
 
 
 # === Settings for Rollout Worker processes ===
-num_workers: 1
+num_workers: 2
 rollout_fragment_length: 16
 num_envs_per_worker: 1
 batch_mode: "complete_episodes"
 
 
 # === Settings for the Trainer process ===
-num_gpus: 0.6
+num_gpus: 1
 train_batch_size: 64
 optimizer: "Adam"
 model: {
-
-  # == Atari ==
   dim: 300,
-
-  # === Built-in options ===
   conv_filters: [
     [16, [5, 5], 4],
     [32, [5, 5], 2],
@@ -28,31 +26,24 @@ model: {
     [128, [5, 5], 2],
     [512, [5, 5], 1],
   ]
-
-  # == LSTM ==
-  # "use_lstm": False,
-  # "max_seq_len": 20,
-  # "lstm_cell_size": 256,
-  # "lstm_use_prev_action": False,
-  # "lstm_use_prev_reward": False,
 }
 
 
 # === PPO ===
-# use_critic: True
-# use_gae: True
-# lambda: 1.0
-# kl_coeff: 0.2
+use_critic: True
+use_gae: True
+lambda: 1.0
+kl_coeff: 0.2
 sgd_minibatch_size: 32
-# shuffle_sequences: True
-# num_sgd_iter: 30
-# lr_schedule: None
-# entropy_coeff: 0.0
-# entropy_coeff_schedule: None
-# clip_param: 0.3
-# vf_clip_param: 10.0
-# grad_clip: None
-# kl_target: 0.01
+shuffle_sequences: True
+num_sgd_iter: 30
+lr_schedule: None
+entropy_coeff: 0.0
+entropy_coeff_schedule: None
+clip_param: 0.3
+vf_clip_param: 10.0
+grad_clip: None
+kl_target: 0.01
 
 
 # === Debug Settings ===
@@ -69,33 +60,29 @@ framework: "torch"
 exploration_config: {
     "type": "StochasticSampling"
   }
-# exploration_config: {
-#   type: "SoftQ",
-#   temperature: 1.0,
-# }
 
 
 # === Evaluation Settings ===
-# evaluation_interval: None
-# evaluation_num_episodes: 10
-# in_evaluation: False
-# evaluation_config: {}
-# evaluation_num_workers: 0
-# custom_eval_function: None
+evaluation_interval: None
+evaluation_num_episodes: 10
+in_evaluation: False
+evaluation_config: {}
+evaluation_num_workers: 0
+custom_eval_function: None
 
 
 # === Advanced Rollout Settings ===
-# remote_worker_envs: False
-# seed: None
-# extra_python_environs_for_driver: {}
-# extra_python_environs_for_worker: {}
+remote_worker_envs: False
+seed: None
+extra_python_environs_for_driver: {}
+extra_python_environs_for_worker: {}
 # timesteps_per_iteration: 20000
 
 
 # === Advanced Resource Settings ===
-num_cpus_per_worker: 4
-num_gpus_per_worker: 0.4
-num_cpus_for_driver: 4
+num_cpus_per_worker: 3
+num_gpus_per_worker: 0.8
+# num_cpus_for_driver: 4
 # memory: 1000000000
 # object_store_memory: 1000000000
 # memory_per_worker: 1000000000
@@ -103,14 +90,14 @@ num_cpus_for_driver: 4
 
 
 # === Environment Settings ===
-# gamma: 0.99
-# horizon: None
-# soft_horizon: False
-# no_done_at_end: False
-# normalize_actions: False
-# clip_rewards: None
-# clip_actions: True
-# lr: 0.0025
+gamma: 0.99
+horizon: None
+soft_horizon: False
+no_done_at_end: False
+normalize_actions: False
+clip_rewards: None
+clip_actions: True
+lr: 0.0025
 env_config:
   carla:
     host: "localhost"
@@ -145,18 +132,15 @@ env_config:
           image_size_y: 300
         collision:
           type: "sensor.other.collision"
-        # lidar:
-        #   type: "sensor.lidar.ray_cast "
-        #   transform: "0,0,2,0,0,0"
     background_activity:
-      n_vehicles: 10
+      n_vehicles: 100
       n_walkers: 0
       tm_hybrid_mode: True
     town: [
-      # "Town07_Opt",
-      # "Town01_Opt",
-      # "Town03_Opt",
-      # "Town02_Opt",
+      "Town07_Opt",
+      "Town01_Opt",
+      "Town03_Opt",
+      "Town02_Opt",
       "Town05_Opt"
       ]
     weather: "dynamic"

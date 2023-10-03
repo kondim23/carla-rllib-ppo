@@ -45,7 +45,7 @@ noted:
                 ssh -L 16007:127.0.0.1:8265 -o IdentitiesOnly=yes -i /home/konstantinos/.ssh/ray-autoscaler_eu-west-3.pem ubuntu@35.181.152.10
 
         remotely:
-            tensorboard --logdir /home/ubuntu/ray_results/carla_rllib/ppo_example --port 6008
+            tensorboard --logdir /home/ubuntu/ray_results/carla_rllib/ppo_implementation --port 6008
 
         browse:
             http://127.0.0.1:16007/
