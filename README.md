@@ -1,6 +1,6 @@
 # End-To-End On-Policy Reinforcement Learning on a Self-Driving Car in Urban Settings
 
-> **This project was developed as part of a BSc thesis at the National and Kapodistrian University of Athens, Department of Informatics and Telecommunications.**
+> **This project was developed as part of a BSc [thesis](thesis/End-To-End%20On-Policy%20Reinforcement%20Learning%20on%20a%20Self-Driving%20Car%20in%20Urban%20Settings.pdf) at the National and Kapodistrian University of Athens, Department of Informatics and Telecommunications.**
 
 ## Overview
 This project implements an end-to-end, on-policy reinforcement learning (RL) approach for autonomous driving in urban environments. It leverages the CARLA simulator for realistic driving scenarios, integrates the Ray framework (with RLlib) for scalable distributed RL, and utilizes AWS infrastructure for efficient training.
@@ -84,6 +84,6 @@ Urban autonomous driving is one of the most challenging problems in robotics and
 ## References
 - [CARLA Simulator](https://carla.org/)
 - [Ray RLlib](https://docs.ray.io/en/latest/rllib/index.html)
-- [Project Thesis](thesis.txt)
+- [Project Thesis](thesis/End-To-End%20On-Policy%20Reinforcement%20Learning%20on%20a%20Self-Driving%20Car%20in%20Urban%20Settings.pdf)
 
 For more details, see the full [thesis](thesis/End-To-End%20On-Policy%20Reinforcement%20Learning%20on%20a%20Self-Driving%20Car%20in%20Urban%20Settings.pdf).
